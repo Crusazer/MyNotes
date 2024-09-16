@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 from src.core.database.models.user import User
 from src.core.dependencies import get_tag_service, get_current_active_user
-from src.core.schemas.tag import STag
+from src.core.schemas.tag import STag, STagGet
 from src.services.tag_service import TagService
 
 router = APIRouter(prefix="/tags", tags=["tag"])
@@ -28,3 +28,13 @@ async def get_all_tags(
     tag_service: TagService = Depends(get_tag_service),
 ) -> list[STag]:
     return await tag_service.get_all_tags()
+
+
+@router.delete("/delete/", status_code=status.HTTP_202_ACCEPTED)
+async def delete_tag(
+    s_tag: Annotated[STagGet, Body()],
+    user: User = Depends(get_current_active_user),
+    tag_service: TagService = Depends(get_tag_service),
+) -> JSONResponse:
+    await tag_service.delete_tag(s_tag)
+    return JSONResponse({"message": "Successfully deleted."})

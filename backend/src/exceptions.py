@@ -40,3 +40,13 @@ class InvalidTokenTypeException(HTTPException):
 class TagNotFoundException(HTTPException):
     def __init__(self, detail="Tag not found."):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+class TagAlreadyExistsException(HTTPException):
+    def __init__(self, detail="Tag already exists."):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+class NoteNotFoundException(HTTPException):
+    def __init__(self, detail="Note not found."):
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)

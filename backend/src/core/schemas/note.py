@@ -20,3 +20,9 @@ class SNote(SNoteCreate):
 
     class Config:
         from_attributes = True
+
+
+class SNoteEdit(BaseModel):
+    title: str | None = None
+    content: str | None = None
+    tags: list["STag"] | None = None

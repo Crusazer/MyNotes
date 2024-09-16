@@ -30,7 +30,6 @@ class UserRepository:
         stmt = stmt.where(User.id == user_uuid)
         result: Result = await self._session.execute(stmt)
         user = result.scalars().first()
-        logger.info(f"Got user by uuid: %s. User: %s", uuid, user)
         return user
 
     async def create_user(self, new_user: SUserCreate) -> User:
