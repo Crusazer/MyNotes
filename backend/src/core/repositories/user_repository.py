@@ -17,7 +17,7 @@ class UserRepository:
     async def get_user_by_email(self, email: str) -> User | None:
         """Get a user bu given fields"""
         stmt: Select = select(User)
-        stmt = stmt.where(User.email==email)
+        stmt = stmt.where(User.email == email)
         result: Result = await self._session.execute(stmt)
         user: User = result.scalar()
         logger.info("Got user by email: %s.", email)
@@ -27,7 +27,7 @@ class UserRepository:
     async def get_user_by_id(self, user_uuid: uuid) -> User | None:
         """Get a user bu given fields"""
         stmt: Select = select(User)
-        stmt = stmt.where(User.id==user_uuid)
+        stmt = stmt.where(User.id == user_uuid)
         result: Result = await self._session.execute(stmt)
         user = result.scalars().first()
         logger.info(f"Got user by uuid: %s. User: %s", uuid, user)

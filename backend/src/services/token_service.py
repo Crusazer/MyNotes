@@ -40,7 +40,7 @@ class TokenService:
         logger.info(f"Added token %s to blacklist", jti)
 
     async def is_token_in_blacklist(self, jti: uuid) -> bool:
-        """ Return true if token founded in black list. """
+        """Return true if token founded in black list."""
         token: TokenBlacklist | None = await self._repository.get_token_by_jti(jti)
         logger.info(f"Check token: %s in blacklist. Token is %s", jti, token)
         return bool(token)
@@ -59,7 +59,7 @@ class TokenService:
 
     @staticmethod
     def _create_jwt_token(
-            payload: dict, token_type: TokenType, expire_time_minutes: int
+        payload: dict, token_type: TokenType, expire_time_minutes: int
     ) -> str:
         payload[TokenType.TYPE.value] = token_type.value
         return encode_jwt(payload, expire_minutes=expire_time_minutes)

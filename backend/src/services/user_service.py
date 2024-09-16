@@ -13,7 +13,9 @@ class UserService:
 
     async def get_user_from_jwt(self, payload: dict) -> User:
         """Get user from JWT via payload"""
-        user: User | None = await self._repository.get_user_by_id(user_uuid=payload["sub"])
+        user: User | None = await self._repository.get_user_by_id(
+            user_uuid=payload["sub"]
+        )
 
         if user is None:
             raise UserNotFoundException
@@ -21,9 +23,9 @@ class UserService:
         return user
 
     async def get_current_user_for_refresh(
-            self,
-            refresh_token: str,
-            token_service: TokenService,
+        self,
+        refresh_token: str,
+        token_service: TokenService,
     ) -> User:
         """Get current user from jwt refresh token and check token type."""
         payload: dict = token_service.get_current_token_payload(refresh_token)

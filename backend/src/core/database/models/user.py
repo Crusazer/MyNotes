@@ -15,7 +15,8 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
     is_superuser: Mapped[bool] = mapped_column(nullable=False, default=False)
     is_staff: Mapped[bool] = mapped_column(nullable=False, default=False)
-    notes: Mapped[list["Note"]] = relationship()
+
+    notes: Mapped[list["Note"]] = relationship(back_populates="author")
 
     def __str__(self):
         return str(self.email)

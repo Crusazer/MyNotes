@@ -48,7 +48,7 @@ class AuthService:
         await self._token_service.add_token_to_blacklist(payload)
 
     async def refresh_jwt_token(self, refresh_token: str, user: User) -> SToken:
-        """ Generate new pair and add old refresh to blacklist. If token is expired or blacklisted raise exception"""
+        """Generate new pair and add old refresh to blacklist. If token is expired or blacklisted raise exception"""
         payload = self._token_service.get_current_token_payload(refresh_token)
 
         if await self._token_service.is_token_in_blacklist(payload.get("jti")):
