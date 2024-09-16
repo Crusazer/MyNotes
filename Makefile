@@ -17,7 +17,3 @@ make_migration:
 
 migrate:
 	docker exec backend alembic upgrade head
-
-# Commands for delete data
-clean:
-	$(DOCKER_COMPOSE) down --volumes --remove-orphans
