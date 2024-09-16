@@ -13,10 +13,6 @@ config = context.config
 
 section = config.config_ini_section
 config.set_section_option(section, "DB_URL", f"{settings.DB.url}?async_fallback=True")
-# config.set_section_option(section,
-#                           "DB_URL",
-#                           f"postgresql://{settings.DB.USERNAME}:{settings.DB.PASSWORD}@{settings.DB.HOST}:"
-#                           f"{settings.DB.PORT}/{settings.DB.NAME}")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

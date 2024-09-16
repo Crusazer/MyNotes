@@ -20,3 +20,6 @@ class User(Base):
 
     def __str__(self):
         return str(self.email)
+
+    def __repr__(self):
+        return str(self.email)
