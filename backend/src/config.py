@@ -1,3 +1,5 @@
+import functools
+
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +14,11 @@ class ConfigDB(BaseSettings):
     PASSWORD: str
 
     model_config = SettingsConfigDict(env_prefix="DB_")
+
+    @functools.cached_property
+    def url(self):
+        # postgresql+asyncpg://user:password@host:port/dbname
+        return f"postgresql+asyncpg://{self.USERNAME}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.NAME}"
 
 
 class Config(BaseSettings):

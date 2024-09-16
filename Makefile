@@ -12,6 +12,9 @@ logs:
 	$(DOCKER_COMPOSE) logs -f
 
 # Migration commands
+make_migration:
+	docker exec backend alembic revision --autogenerate -m "$(msg)"
+
 migrate:
 	docker exec backend alembic upgrade head
 
