@@ -11,6 +11,7 @@ def main_keyboard() -> ReplyKeyboardMarkup:
 
     keyboard.button(text="Создать заметку")
     keyboard.button(text="Показать все заметки")
+    keyboard.button(text="Поиск заметок по тегам")
 
     return keyboard.as_markup(resize_keyboard=True, one_time_keyboard=True)
 

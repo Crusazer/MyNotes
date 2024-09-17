@@ -16,6 +16,7 @@ class ApiManager:
     refresh_token_url = settings.API_DOMAIN + "/v1/auth/refresh_token/"
     get_all_notes_url = settings.API_DOMAIN + "/v1/notes/all/"
     get_note_url = settings.API_DOMAIN + "/v1/notes/"
+    get_notes_by_tags_url = settings.API_DOMAIN + "/v1/notes/by-tags/"
     create_note_url = settings.API_DOMAIN + "/v1/notes/create/"
     delete_notes_url = settings.API_DOMAIN + "/v1/notes/delete/"
     edit_note_url = settings.API_DOMAIN + "/v1/notes/update/"
@@ -94,6 +95,35 @@ class ApiManager:
                     response: Response = await client.post(
                         url=self.get_all_notes_url,
                         headers={"Authorization": f"Bearer {user.access_token}"})
+
+                if response.status_code == 404:
+                    return []
+                elif response.status_code == 200:
+                    return response.json()
+                else:
+                    logger.error(f"Failed to get notes for user: %s. Response: %s", user.email, response.text)
+
+        except Exception as e:
+            logger.error(f"Failed to get user notes: %s", e, exc_info=e)
+
+    async def get_user_notes_by_tags(self, user: User, tags: list[str]) -> list[dict]:
+        data: list[dict[str, str]] = [{"name": tag} for tag in tags]
+        try:
+            async with httpx.AsyncClient() as client:
+                response: Response = await client.post(
+                    url=self.get_notes_by_tags_url,
+                    headers={"Authorization": f"Bearer {user.access_token}"},
+                    json=data
+                )
+
+                # Non authorize error
+                if response.status_code == 401:
+                    await self.refresh_token(user)
+                    response: Response = await client.post(
+                        url=self.get_notes_by_tags_url,
+                        headers={"Authorization": f"Bearer {user.access_token}"},
+                        json=data
+                    )
 
                 if response.status_code == 404:
                     return []

@@ -12,3 +12,8 @@ class CreateNoteState(StatesGroup):
     get_title = State()
     get_content = State()
     get_tags = State()
+
+
+class FindNoteByTagsState(StatesGroup):
+    """ State to find user note by tags """
+    get_tags = State()

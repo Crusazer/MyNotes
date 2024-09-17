@@ -32,7 +32,6 @@ class NoteRepository:
 
         return SNote.model_validate(note, from_attributes=True)
 
-
     async def get_all(self, user_id: uuid.UUID) -> list[SNote]:
         """Get all notes of a user."""
         query = (
@@ -86,7 +85,21 @@ class NoteRepository:
         await self._db_session.commit()
         await self._db_session.refresh(note, attribute_names=["tags", "updated_at"])
         logger.info("Note %s updated. Title: %s", note.id, note.title)
+
         return SNote.from_orm(note)
+
+    async def get_by_tags(self, user: User, tag_names: list["STagCreate"]) -> list[SNote]:
+        """ Get all notes of a user via tags. """
+        list_tags: list[str] = [tag.name for tag in tag_names]
+        stmt: Select = (select(Note).
+                        join(Note.tags).
+                        where(Note.author == user).
+                        where(Tag.name.in_(list_tags)).
+                        options(selectinload(Note.tags))
+                        )
+        result: Result = await self._db_session.execute(stmt)
+        notes: list[Note] = result.scalars().all()
+        return [SNote.model_validate(note, from_attributes=True) for note in notes]
 
     async def _get_user_note(self, user: User, note_id: uuid.UUID) -> Note:
         """Get note if user it exists and user is owner."""

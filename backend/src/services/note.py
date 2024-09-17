@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database.models.user import User
 from src.core.repositories.note_repository import NoteRepository
 from src.core.schemas.note import SNote, SNoteCreate, SNoteEdit
+from src.core.schemas.tag import STagCreate
 
 logger = logging.getLogger(__name__)
 
@@ -35,3 +36,8 @@ class NoteService:
     ) -> SNote:
         """Change note if exists and user is owned."""
         return await self.note_repository.edit(user, note_uuid, note)
+
+    async def get_notes_by_tags(self, user: User, tags: list["STagCreate"]) -> list[SNote]:
+        """ Get notes by tags. """
+        notes: list[SNote] = await self.note_repository.get_by_tags(user, tags)
+        return notes

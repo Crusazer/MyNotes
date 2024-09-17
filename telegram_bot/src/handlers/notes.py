@@ -5,7 +5,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, User
 
-from src.FSM.FSM import CreateNoteState
+from src.FSM.FSM import CreateNoteState, FindNoteByTagsState
 from src.database import database as db
 from src.keyboards.inline import get_note_inline
 from src.manager import ApiManager
@@ -33,6 +33,36 @@ async def all_notes(message: Message):
             )
 
 
+@router.message(StateFilter(None), F.text == "Поиск заметок по тегам")
+async def get_notes_by_tags(message: Message, state: FSMContext):
+    await state.set_state(FindNoteByTagsState.get_tags)
+    await message.answer(text="Введите теги через пробел:")
+
+
+@router.message(StateFilter(FindNoteByTagsState.get_tags))
+async def get_tags_for_note(message: Message, state: FSMContext):
+    user: User = await db.get_user_by_telegram_id(message.from_user.id)
+    manager: ApiManager = ApiManager()
+    tags: list[str] = message.text.split()
+    for tag in tags:
+        if not tag.startswith("#"):
+            tag = f"#{tag}"
+
+    notes: list[dict] = await manager.get_user_notes_by_tags(user, tags)
+    if not notes:
+        await message.answer(text="Заметки с такими тегами не найдены.")
+
+    else:
+        for note in notes:
+            note_text = (f"<b>{note['title']}</b>\n"
+                         f"{note['content']}\n"
+                         f"{' '.join([tag["name"] for tag in note['tags']])}")
+            await message.answer(
+                text=note_text,
+                reply_markup=get_note_inline(note["id"])
+            )
+    await state.clear()
+
 @router.message(StateFilter(None), F.text == "Создать заметку")
 async def create_notes(message: Message, state: FSMContext):
     await state.set_state(CreateNoteState.get_title)
@@ -50,6 +80,7 @@ async def get_note_title(message: Message, state: FSMContext):
         await state.set_state(CreateNoteState.get_content)
         await message.answer(text="Введите текст заметки: ")
 
+
 @router.message(StateFilter(CreateNoteState.get_content))
 async def get_note_content(message: Message, state: FSMContext):
     """ Step 2. Get note content. """
@@ -60,6 +91,7 @@ async def get_note_content(message: Message, state: FSMContext):
         await state.update_data(content=content)
         await state.set_state(CreateNoteState.get_tags)
         await message.answer("Введите теги через пробел. Например: #home #friends")
+
 
 @router.message(StateFilter(CreateNoteState.get_tags))
 async def get_note_tags(message: Message, state: FSMContext):
@@ -80,4 +112,3 @@ async def get_note_tags(message: Message, state: FSMContext):
     text: str = await manager.create_note(user, data)
     await message.answer(text=text)
     await state.clear()
-

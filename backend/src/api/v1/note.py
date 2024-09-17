@@ -6,6 +6,7 @@ from fastapi.params import Depends
 from src.core.database.models.user import User
 from src.core.dependencies import get_current_active_user, get_note_service
 from src.core.schemas.note import SNote, SNoteCreate, SNoteEdit
+from src.core.schemas.tag import STagCreate
 from src.services.note import NoteService
 from starlette import status
 from starlette.responses import JSONResponse
@@ -61,3 +62,12 @@ async def update_note(
         note_service: NoteService = Depends(get_note_service),
 ) -> SNote:
     return await note_service.edit_note(user, note_uuid, note)
+
+
+@router.post("/by-tags/", response_model=list[SNote])
+async def get_by_tags(
+        tags: Annotated[list[STagCreate], Body()],
+        user: User = Depends(get_current_active_user),
+        note_service: NoteService = Depends(get_note_service),
+) -> list[SNote]:
+    return await note_service.get_notes_by_tags(user, tags)
