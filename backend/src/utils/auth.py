@@ -7,10 +7,10 @@ from src.config import settings
 
 
 def encode_jwt(
-    payload: dict,
-    secret_key: str = settings.SECRET_KEY,
-    algorithm: str = "HS256",
-    expire_minutes: int = settings.ACCESS_TOKEN_LIFE,
+        payload: dict,
+        secret_key: str = settings.SECRET_KEY,
+        algorithm: str = "HS256",
+        expire_minutes: int = settings.ACCESS_TOKEN_LIFE,
 ) -> str:
     to_encode = payload.copy()
     now = datetime.now(timezone.utc)
@@ -21,9 +21,9 @@ def encode_jwt(
 
 
 def decode_jwt(
-    token: str | bytes,
-    secret_key: str = settings.SECRET_KEY,
-    algorithm: str = "HS256",
+        token: str | bytes,
+        secret_key: str = settings.SECRET_KEY,
+        algorithm: str = "HS256",
 ) -> dict:
     decoded = jwt.decode(token, secret_key, algorithms=[algorithm])
     return decoded

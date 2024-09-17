@@ -6,6 +6,7 @@ from sqlalchemy import pool
 
 from src.config import settings
 from src.core.database.models.base import Base
+from src.core.database.models import note, tag, token_blacklist, user
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

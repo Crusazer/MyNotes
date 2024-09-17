@@ -24,7 +24,7 @@
       "class": "logging.handlers.TimedRotatingFileHandler",
       "level": "WARNING",
       "formatter": "basic",
-      "filename": "logs/backend_debug.log",
+      "filename": "logs/bot_debug.log",
       "when": "midnight",
       "interval": 1,
       "backupCount": 30
