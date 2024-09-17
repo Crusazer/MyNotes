@@ -22,5 +22,15 @@ services:
     ports:
       - "8000:8000"
 
+  telegram_bot:
+    build:
+      context: ./telegram_bot
+    container_name: telegram_bot
+    volumes:
+      - ./telegram_bot:/app
+    depends_on:
+      - my_notes_db
+      - backend
+
 volumes:
   postgres_db:
