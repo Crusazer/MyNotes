@@ -21,12 +21,13 @@
       "stream": "ext://sys.stdout"
     },
     "file": {
-      "class": "logging.handlers.RotatingFileHandler",
+      "class": "logging.handlers.TimedRotatingFileHandler",
       "level": "WARNING",
       "formatter": "basic",
       "filename": "logs/backend_debug.log",
-      "maxBytes": 10000,
-      "backupCount": 3
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 30
     }
   },
   "loggers": {
