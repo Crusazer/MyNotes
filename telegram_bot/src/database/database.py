@@ -53,12 +53,12 @@ async def get_user_by_telegram_id(telegram_id: int) -> User | None:
     return None
 
 
-async def update_tokens(telegram_id: int, access_token: str, refresh_token: str):
+async def update_tokens(user: User):
     """ Update user tokens """
     async with aiosqlite.connect(DATABASE_NAME) as db:
         await db.execute('''
             UPDATE users
             SET access_token = ?, refresh_token = ?
             WHERE telegram_id = ?
-        ''', (access_token, refresh_token, telegram_id))
+        ''', (user.access_token, user.refresh_token, user.telegram_id))
         await db.commit()

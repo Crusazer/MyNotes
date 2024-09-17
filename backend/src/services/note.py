@@ -2,7 +2,6 @@ import logging
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.core.database.models.user import User
 from src.core.repositories.note_repository import NoteRepository
 from src.core.schemas.note import SNote, SNoteCreate, SNoteEdit
@@ -14,6 +13,11 @@ class NoteService:
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
         self.note_repository = NoteRepository(db_session)
+
+    async def get_note(self, user: User, note_uuid: uuid.UUID) -> SNote:
+        """ Get note if exists and user is owned. """
+        note: SNote = await self.note_repository.get_by_uuid(note_uuid)
+        return note
 
     async def get_all_notes(self, user: User) -> list[SNote]:
         notes: list[SNote] = await self.note_repository.get_all(user.id)
@@ -27,7 +31,7 @@ class NoteService:
         await self.note_repository.delete(user, note_uuid)
 
     async def edit_note(
-        self, user: User, note_uuid: uuid.UUID, note: SNoteEdit
+            self, user: User, note_uuid: uuid.UUID, note: SNoteEdit
     ) -> SNote:
         """Change note if exists and user is owned."""
         return await self.note_repository.edit(user, note_uuid, note)

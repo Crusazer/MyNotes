@@ -3,13 +3,13 @@ import uuid
 
 from sqlalchemy import select, Result, Select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
-
+from sqlalchemy.orm import joinedload, selectinload
 from src.core.database.models.note import Note
 from src.core.database.models.tag import Tag
 from src.core.database.models.user import User
 from src.core.schemas.note import SNote, SNoteCreate, SNoteEdit
-from src.exceptions import TagNotFoundException, NoteNotFoundException
+from src.core.schemas.tag import STagCreate
+from src.exceptions import NoteNotFoundException
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,21 @@ logger = logging.getLogger(__name__)
 class NoteRepository:
     def __init__(self, db_session: AsyncSession) -> None:
         self._db_session = db_session
+
+    async def get_by_uuid(self, user: User, note_uuid: uuid.UUID) -> SNote:
+        """ Get note by uuid if exists and user is owned. """
+        stmt: Select = (select(Note).
+                        options(selectinload(Note.tags)).
+                        where(and_(Note.uuid == note_uuid, Note.author == user))
+                        )
+
+        result: Result = await self._db_session.execute(stmt)
+        note: Note = result.scalar().first()
+        if note is None:
+            raise NoteNotFoundException
+
+        return SNote.model_validate(note, from_attributes=True)
+
 
     async def get_all(self, user_id: uuid.UUID) -> list[SNote]:
         """Get all notes of a user."""
@@ -35,8 +50,8 @@ class NoteRepository:
 
     async def create(self, user_id: uuid.UUID, s_note: SNoteCreate) -> SNote:
         """Create new note if not exists and all tags exists."""
-        tags_list_id: list[uuid.UUID] = [tag.id for tag in s_note.tags]
-        tags_list: list[Tag] = await self._get_tag_list(tags_list_id)
+        tags_list: list["STag"] = [tag.name for tag in s_note.tags]
+        tags_list: list[Tag] = await self._get_tag_list(tags_list)
 
         note = Note(
             title=s_note.title, content=s_note.content, user_id=user_id, tags=tags_list
@@ -64,8 +79,8 @@ class NoteRepository:
             note.content = s_note.content
 
         if s_note.tags is not None:
-            tags_list_id: list[uuid.UUID] = [tag.id for tag in s_note.tags]
-            tags_list: list[Tag] = await self._get_tag_list(tags_list_id)
+            tags_list: list["STagCreate"] = [tag.name for tag in s_note.tags]
+            tags_list: list["STagCreate"] = await self._get_tag_list(tags_list)
             note.tags = tags_list
 
         await self._db_session.commit()
@@ -83,13 +98,34 @@ class NoteRepository:
             raise NoteNotFoundException()
         return note
 
-    async def _get_tag_list(self, list_tag_id: list[uuid.UUID]) -> list[Tag]:
-        existing_tags_stmt: Select = select(Tag).where(Tag.id.in_(list_tag_id))
-        tags_result: Result = await self._db_session.execute(existing_tags_stmt)
-        tags_list: list[Tag] = tags_result.scalars().all()
+    async def _get_tag_list(self, tag_names: list["STagCreate"]) -> list[Tag]:
+        """Get existing tags by names and create new ones if they don't exist."""
 
-        if len(list_tag_id) != len(tags_list):
-            logger.warning("Some tags do not match")
-            raise TagNotFoundException()
+        # Step 1: Fetch existing tags
+        existing_tags_stmt = select(Tag).where(Tag.name.in_(tag_names))
+        result = await self._db_session.execute(existing_tags_stmt)
+        existing_tags = result.scalars().all()
 
-        return tags_list
+        # Extract names of existing tags
+        existing_tag_names = {tag.name for tag in existing_tags}
+
+        # Determine which tags are missing
+        missing_tag_names = set(tag_names) - existing_tag_names
+
+        # Step 2: Create missing tags
+        if missing_tag_names:
+            # Bulk insert for efficiency
+            for name in missing_tag_names:
+                new_tag = Tag(name=name)
+                self._db_session.add(new_tag)
+
+            # Commit changes so the new tags are persisted in the database
+            await self._db_session.commit()
+
+            # Fetch all tags again, including newly created ones
+            result = await self._db_session.execute(select(Tag).where(Tag.name.in_(tag_names)))
+            all_tags = result.scalars().all()
+        else:
+            all_tags = existing_tags
+
+        return all_tags

@@ -3,13 +3,13 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from .tag import STag
+from .tag import STagCreate, STag
 
 
 class SNoteCreate(BaseModel):
     title: str
     content: str
-    tags: list[uuid.UUID] | None
+    tags: list["STagCreate"] | None
 
 
 class SNote(SNoteCreate):
@@ -25,4 +25,4 @@ class SNote(SNoteCreate):
 class SNoteEdit(BaseModel):
     title: str | None = None
     content: str | None = None
-    tags: list["STag"] | None = None
+    tags: list["STagCreate"] | None = None

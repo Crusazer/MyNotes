@@ -5,8 +5,6 @@ import uuid
 
 from jwt import InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.config import settings
 from src.core.database.models.user import User
 from src.core.repositories.token_repository import TokenRepository
 from src.exceptions import (
@@ -14,6 +12,8 @@ from src.exceptions import (
     InvalidTokenTypeException,
 )
 from src.utils.auth import encode_jwt, decode_jwt
+
+from src.config import settings
 
 if typing.TYPE_CHECKING:
     from src.core.database.models.token_blacklist import TokenBlacklist
@@ -67,7 +67,7 @@ class TokenService:
     @staticmethod
     def get_current_token_payload(token: str) -> dict:
         try:
-            payload: dict = decode_jwt(token=token)
+            payload: dict = decode_jwt(token=token.strip())
         except InvalidTokenError as e:
             logger.info(f"Invalid token: %s", token)
             raise InvalidTokenException

@@ -5,6 +5,7 @@ from aiogram.types import Message
 from src.FSM.FSM import RegisterNewUserState
 from src.database import database as db
 from src.database.database import User
+from src.keyboards.reply import main_keyboard
 from src.manager import ApiManager
 
 router = Router()
@@ -33,7 +34,7 @@ async def get_password(message: Message, state: FSMContext):
     telegram_id = message.from_user.id
 
     manager: ApiManager = ApiManager()
-    user: User | None = await manager.register_user(email, password, telegram_id)
+    user: User | str | None = await manager.register_user(email, password, telegram_id)
     if user is None:
         # Error
         await state.set_state(RegisterNewUserState.add_password)
@@ -42,11 +43,10 @@ async def get_password(message: Message, state: FSMContext):
     elif isinstance(user, User):
         # Success register
         await db.add_user(user)
-        await message.answer(text="Регистрация успешно завершена!")
+        await message.answer(text="Регистрация успешно завершена!", reply_markup=main_keyboard())
         await state.clear()
 
     else:
         # Return error message.
         await state.set_state(RegisterNewUserState.add_email)
-        detail: list = user['detail']
-        await message.answer(text=detail[0]['msg'].capitalize() + "\nВведите корректный email: ")
+        await message.answer(text=user + "\nВведите корректный email: ")

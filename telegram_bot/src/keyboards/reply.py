@@ -5,13 +5,12 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 def main_keyboard() -> ReplyKeyboardMarkup:
     """
     Create a main keyboard
-    :return: объект reply-клавиатуры
+    :return: object reply-keyboard
     """
     keyboard = ReplyKeyboardBuilder()
 
-    keyboard.button(text="Показать все товары")
-    keyboard.button(text="Показать следующую страницу")
-    keyboard.button(text="Поддержка")
+    keyboard.button(text="Создать заметку")
+    keyboard.button(text="Показать все заметки")
 
     return keyboard.as_markup(resize_keyboard=True, one_time_keyboard=True)
 

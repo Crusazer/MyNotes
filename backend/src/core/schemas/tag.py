@@ -7,8 +7,15 @@ class STagGet(BaseModel):
     id: uuid.UUID
 
 
-class STag(STagGet):
+class STagCreate(BaseModel):
     name: str
+
+    class Config:
+        from_attributes = True
+
+
+class STag(STagCreate):
+    id: uuid.UUID
 
     class Config:
         from_attributes = True

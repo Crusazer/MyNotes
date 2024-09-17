@@ -1,15 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
-from starlette import status
-from starlette.responses import JSONResponse
-
 from src.core.database.models.user import User
 from src.core.dependencies import get_tag_service, get_current_active_user
 from src.core.schemas.tag import STag, STagGet
 from src.services.tag_service import TagService
+from starlette import status
+from starlette.responses import JSONResponse
 
-router = APIRouter(prefix="/tags", tags=["tag"])
+router = APIRouter(prefix="/v1/tags", tags=["tag"])
 
 
 @router.post("/create/", status_code=status.HTTP_201_CREATED)
